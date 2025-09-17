@@ -7,9 +7,10 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class AuthController(IAuthService authService) : Controller
+public class AuthController(IAuthService authService, IAccessTokenService accessTokenService) : Controller
 {
     private readonly IAuthService _authService = authService;
+    private readonly IAccessTokenService _accessTokenService = accessTokenService;
 
 
     [HttpPost("/signup")]
@@ -27,6 +28,30 @@ public class AuthController(IAuthService authService) : Controller
 
         }
         catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("/signin")]
+    public async Task<IActionResult> SignIn([FromBody] SignInModel form)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try
+        {
+            var CheckCredentialsResult = await _authService.CheckCredentials(form);
+            if (CheckCredentialsResult.Data is null) return StatusCode(CheckCredentialsResult.StatusCode, CheckCredentialsResult.ErrorMessage!);
+            var user = CheckCredentialsResult.Data;
+
+            var accesstoken = _accessTokenService.GenerateAccessTokenAsync(user.Id);
+            if (string.IsNullOrEmpty(accesstoken))
+                return StatusCode(500, "Failed To create access token");
+            Response.Headers.Append("Bearer-Token", accesstoken);
+
+            return Ok(new { success = true, message = "You Signed in successfully" });
+
+        } catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
             return StatusCode(500, "Something went wrong");

@@ -30,4 +30,15 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
             return ServiceResult<bool>.Error("Something went wrong");
         }
     }
+
+    public async Task<ServiceResult<UserEntity>> CheckCredentials(SignInModel form)
+    {
+        var user = await _userManager.FindByEmailAsync(form.Email);
+        if (user is null) return ServiceResult<UserEntity>.Unauthorized("Invalid password or email");
+
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, form.Password);
+        if (!isPasswordValid) return ServiceResult<UserEntity>.Unauthorized("Invalid password or email");
+
+        return ServiceResult<UserEntity>.Ok(user);
+    }
 }
