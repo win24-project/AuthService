@@ -21,6 +21,11 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
 
             var user = new UserEntity { Email = form.Email, UserName = form.Email };
             var result = await _userManager.CreateAsync(user, form.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return ServiceResult<bool>.BadRequest(errors);
+            }
 
             return ServiceResult<bool>.Ok("Successfully signed up, please confirm your email.");
         }
