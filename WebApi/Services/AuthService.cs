@@ -1,0 +1,33 @@
+﻿using Microsoft.AspNetCore.Identity;
+using System.Diagnostics;
+using System.Text;
+using WebApi.Data.Context;
+using WebApi.Data.Entities;
+using WebApi.Interfaces;
+using WebApi.Models;
+
+namespace WebApi.Services;
+
+public class AuthService(UserManager<UserEntity> userManager) : IAuthService
+{
+    private readonly UserManager<UserEntity> _userManager = userManager;
+    public async Task<ServiceResult<bool>> SignUp(SignUpModel form)
+    {
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(form.Email);
+            if (existingUser != null)
+                return ServiceResult<bool>.Conflict("Email already exists");
+
+            var user = new UserEntity { Email = form.Email, UserName = form.Email };
+            var result = await _userManager.CreateAsync(user, form.Password);
+
+            return ServiceResult<bool>.Ok("Successfully signed up, please confirm your email.");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return ServiceResult<bool>.Error("Something went wrong");
+        }
+    }
+}
