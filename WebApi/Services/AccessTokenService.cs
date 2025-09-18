@@ -16,7 +16,7 @@ public class AccessTokenService(IConfiguration configuration) : IAccessTokenServ
     {
         string issuer = _configuration["JwtIssuer"];
         string audience = _configuration["JwtAudience"];
-        string key = _configuration["JwtSecretKey"];
+        string key = _configuration["JwtPublicKey"];
 
         var claims = new List<Claim>
             {
