@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -7,14 +9,13 @@ using WebApi.Interfaces;
 
 namespace WebApi.Services;
 
-public class AccessTokenService(IConfiguration config) : IAccessTokenService
+public class AccessTokenService(SecretClient secretClient) : IAccessTokenService
 {
-    private readonly IConfiguration _config = config;
-    public string GenerateAccessTokenAsync(string userId)
+    public async Task<string> GenerateAccessTokenAsync(string userId)
     {
-        var issuer = _config["Jwt:Issuer"];
-        var audience = _config["Jwt:Audience"];
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        KeyVaultSecret issuer = await secretClient.GetSecretAsync("JwtIssuer");
+        KeyVaultSecret audience = await secretClient.GetSecretAsync("JwtAudience");
+        KeyVaultSecret key = await secretClient.GetSecretAsync("JwtSecretKey");
 
         var claims = new List<Claim>
             {
@@ -27,12 +28,14 @@ public class AccessTokenService(IConfiguration config) : IAccessTokenService
                 { "typ", "JWT" }
             };
         var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
+            issuer: issuer.Value,
+            audience: audience.Value,
             claims: claims,
             notBefore: DateTime.UtcNow,
             expires: DateTime.UtcNow.AddMinutes(60),
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key.Value)), 
+                SecurityAlgorithms.HmacSha256)
         );
 
         var JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
