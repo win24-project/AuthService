@@ -9,13 +9,14 @@ using WebApi.Interfaces;
 
 namespace WebApi.Services;
 
-public class AccessTokenService(SecretClient secretClient) : IAccessTokenService
+public class AccessTokenService(IConfiguration configuration) : IAccessTokenService
 {
+    private readonly IConfiguration _configuration = configuration;
     public async Task<string> GenerateAccessTokenAsync(string userId)
     {
-        KeyVaultSecret issuer = await secretClient.GetSecretAsync("JwtIssuer");
-        KeyVaultSecret audience = await secretClient.GetSecretAsync("JwtAudience");
-        KeyVaultSecret key = await secretClient.GetSecretAsync("JwtSecretKey");
+        string issuer = _configuration["JwtIssuer"];
+        string audience = _configuration["JwtAudience"];
+        string key = _configuration["JwtSecretKey"];
 
         var claims = new List<Claim>
             {
@@ -28,13 +29,13 @@ public class AccessTokenService(SecretClient secretClient) : IAccessTokenService
                 { "typ", "JWT" }
             };
         var token = new JwtSecurityToken(
-            issuer: issuer.Value,
-            audience: audience.Value,
+            issuer: issuer,
+            audience: audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
             expires: DateTime.UtcNow.AddMinutes(60),
             signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key.Value)), 
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), 
                 SecurityAlgorithms.HmacSha256)
         );
 
