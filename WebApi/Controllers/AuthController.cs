@@ -46,7 +46,7 @@ public class AuthController(IAuthService authService, IAccessTokenService access
 
             var accesstoken = await _accessTokenService.GenerateAccessTokenAsync(user.Id);
             if (string.IsNullOrEmpty(accesstoken))
-                return StatusCode(500, "Failed To create access token");
+                return StatusCode(500, "Failed To create the access token");
             Response.Headers.Append("Bearer-Token", accesstoken);
 
             return Ok(new { success = true, message = "You Signed in successfully" });
