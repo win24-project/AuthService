@@ -2,5 +2,5 @@
 
 public interface IAccessTokenService
 {
-    public string GenerateAccessTokenAsync(string userId);
+    public Task<string> GenerateAccessTokenAsync(string userId);
 }
