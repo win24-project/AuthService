@@ -3,6 +3,7 @@ using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data.Context;
+using WebApi.Data.DataSeeding;
 using WebApi.Data.Entities;
 using WebApi.Interfaces;
 using WebApi.Services;
@@ -15,9 +16,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddAzureKeyVault(new Uri("https://group-project-keyvault.vault.azure.net/"), new DefaultAzureCredential());
-builder.Services.AddDbContext<ApplicationDbContext>(options => {
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
     options.UseSqlServer(builder.Configuration["DbConnectionString-GroupProject"]);
 });
+//builder.Services.AddDbContext<ApplicationDbContext>(options => {
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"));
+//});
 builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
     {
         options.Password.RequireNonAlphanumeric = true;
@@ -26,12 +31,14 @@ builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<IAccessTokenService, AccessTokenService>();
+builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+    await SeedAdmin.EnsureAdminUserExistAsync(services, builder.Configuration);
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
