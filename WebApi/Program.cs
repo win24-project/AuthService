@@ -37,10 +37,10 @@ builder.Services.AddScoped<IAccessTokenService, AccessTokenService>();
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    await SeedAdmin.EnsureAdminUserExistAsync(services, builder.Configuration);
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    await SeedAdmin.EnsureAdminUserExistAsync(scope.ServiceProvider, builder.Configuration);
 }
 
 app.UseSwagger();
