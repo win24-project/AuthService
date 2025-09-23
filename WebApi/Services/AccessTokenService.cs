@@ -1,33 +1,37 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebApi.Data.Entities;
 using WebApi.Interfaces;
 
 namespace WebApi.Services;
 
-public class AccessTokenService(IConfiguration configuration) : IAccessTokenService
+public class AccessTokenService(IConfiguration configuration, UserManager<UserEntity> userManager) : IAccessTokenService
 {
     private readonly IConfiguration _configuration = configuration;
-    public async Task<string> GenerateAccessTokenAsync(string userId)
+    private readonly UserManager<UserEntity> _userManager = userManager;
+    public async Task<string> GenerateAccessTokenAsync(UserEntity user)
     {
         string issuer = _configuration["JwtIssuer"];
         string audience = _configuration["JwtAudience"];
         string key = _configuration["JwtPublicKey"];
 
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Count == 0)
+            return String.Empty;
+
         var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(JwtRegisteredClaimNames.Sub, userId)
+                new(JwtRegisteredClaimNames.Sub, user.Id),
             };
-        var header = new JwtHeader
-            {
-                { "alg", "HS256" },
-                { "typ", "JWT" }
-            };
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
@@ -41,7 +45,6 @@ public class AccessTokenService(IConfiguration configuration) : IAccessTokenServ
 
         var JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         var jwt = JwtSecurityTokenHandler.WriteToken(token);
-
         return jwt;
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace WebApi.Interfaces;
+﻿using WebApi.Data.Entities;
+
+namespace WebApi.Interfaces;
 
 public interface IAccessTokenService
 {
-    public Task<string> GenerateAccessTokenAsync(string userId);
+    public Task<string> GenerateAccessTokenAsync(UserEntity user);
 }

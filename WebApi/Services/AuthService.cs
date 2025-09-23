@@ -20,12 +20,14 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
                 return ServiceResult<bool>.Conflict("Email already exists");
 
             var user = new UserEntity { Email = form.Email, UserName = form.Email };
-            var result = await _userManager.CreateAsync(user, form.Password);
-            if (!result.Succeeded)
+            var userResult = await _userManager.CreateAsync(user, form.Password);
+            if (!userResult.Succeeded)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                var errors = string.Join(", ", userResult.Errors.Select(e => e.Description));
                 return ServiceResult<bool>.BadRequest(errors);
             }
+
+            await _userManager.AddToRoleAsync(user, "Member");
 
             return ServiceResult<bool>.Ok("Successfully signed up, please confirm your email.");
         }

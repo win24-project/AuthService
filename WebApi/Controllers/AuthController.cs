@@ -44,7 +44,7 @@ public class AuthController(IAuthService authService, IAccessTokenService access
             if (CheckCredentialsResult.Data is null) return StatusCode(CheckCredentialsResult.StatusCode, CheckCredentialsResult.ErrorMessage!);
             var user = CheckCredentialsResult.Data;
 
-            var accesstoken = await _accessTokenService.GenerateAccessTokenAsync(user.Id);
+            var accesstoken = await _accessTokenService.GenerateAccessTokenAsync(user);
             if (string.IsNullOrEmpty(accesstoken))
                 return StatusCode(500, "Failed To create the access token");
 
