@@ -19,7 +19,7 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
             if (existingUser != null)
                 return ServiceResult<bool>.Conflict("Email already exists");
 
-            var user = new UserEntity { Email = form.Email, UserName = form.Email };
+            var user = new UserEntity { Email = form.Email, UserName = form.Email, CustomerId = "None" };
             var userResult = await _userManager.CreateAsync(user, form.Password);
             if (!userResult.Succeeded)
             {
