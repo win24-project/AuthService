@@ -34,7 +34,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("profile/change-membership")]
+    [HttpPost("/profile/change-membership")]
     public async Task<IActionResult> ChangeMembership([FromQuery] int membershipId)
     {
         try
@@ -55,7 +55,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("profile/change-subscription-status")]
+    [HttpPost("/profile/change-subscription-status")]
     public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string status)
     {
         try
@@ -77,7 +77,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("profile/change-customer-id")]
+    [HttpPost("/profile/change-customer-id")]
     public async Task<IActionResult> ChangeCustomerId([FromQuery] string customerID)
     {
         try
@@ -99,7 +99,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("profile/add-subscription")]
+    [HttpPost("/profile/add-subscription")]
     [AllowAnonymous]
     public async Task<IActionResult> ChangeCustomerId([FromBody] SubscriptionRequest subscriptionRequest)
     {
