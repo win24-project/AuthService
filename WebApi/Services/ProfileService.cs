@@ -80,6 +80,31 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
+    public async Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return ServiceResult<bool>.NotFound("Could not find user");
+
+            user.SubscriptionStatus = status;
+            user.CustomerId = customerId;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return ServiceResult<bool>.Error($"Failed to add subscription");
+            }
+
+            return ServiceResult<bool>.Ok(true);
+
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<bool>.Error("Failed to add subscription");
+        }
+    }
+
     public async Task<ServiceResult<ProfileModel>> GetProfile(string userId)
     {
         try

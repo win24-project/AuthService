@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Security.Claims;
 using WebApi.Interfaces;
+using WebApi.Models;
 
 namespace WebApi.Controllers;
 
@@ -87,6 +88,27 @@ public class ProfileController(IProfileService profileService) : ControllerBase
             if (userId == null) return Unauthorized();
 
             var result = await _profileService.ChangeCustomerId(userId, customerID);
+            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
+
+            return Ok("Customer id was updated in profile successfully");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("profile/add-subscription")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ChangeCustomerId([FromBody] SubscriptionRequest subscriptionRequest)
+    {
+        try
+        {
+            if (String.IsNullOrEmpty(subscriptionRequest.CustomerId)) return BadRequest("No customer id was provided");
+            if (String.IsNullOrEmpty(subscriptionRequest.SubscriptionStatus)) return BadRequest("No status was provided");
+
+            var result = await _profileService.AddSubscription(subscriptionRequest.AccountId, subscriptionRequest.SubscriptionStatus, subscriptionRequest.CustomerId);
             if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
 
             return Ok("Customer id was updated in profile successfully");
