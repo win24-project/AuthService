@@ -6,5 +6,9 @@ public class ProfileModel
 
     public int MembershipId { get; set; }
 
+    public string SubscriptionStatus { get; set; } = null!;
+
+    public string? CustomerId { get; set; }
+
     public string Email { get; set; } = null!;
 }
