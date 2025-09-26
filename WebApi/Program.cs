@@ -40,15 +40,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//builder.Configuration.AddAzureKeyVault(new Uri("https://group-project-keyvault.vault.azure.net/"), new DefaultAzureCredential());
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//{
-//    options.UseSqlServer(builder.Configuration["DbConnectionString-GroupProject"]);
-//});
+builder.Configuration.AddAzureKeyVault(new Uri("https://group-project-keyvault.vault.azure.net/"), new DefaultAzureCredential());
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"));
+    options.UseSqlServer(builder.Configuration["DbConnectionString-GroupProject"]);
 });
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//{
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"));
+//});
 
 builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
     {
