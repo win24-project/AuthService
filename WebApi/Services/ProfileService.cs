@@ -32,6 +32,54 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
+    public async Task<ServiceResult<bool>> ChangeCustomerId(string userId, string customerÍd)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return ServiceResult<bool>.NotFound("Could not find user");
+
+            user.CustomerId = customerÍd;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return ServiceResult<bool>.Error($"Failed to change customer id");
+            }
+
+            return ServiceResult<bool>.Ok(true);
+
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<bool>.Error("Failed to add membership in profile");
+        }
+    }
+
+    public async Task<ServiceResult<bool>> ChangeSubscriptionStatus(string userId, string status)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return ServiceResult<bool>.NotFound("Could not find user");
+
+            user.SubscriptionStatus = status;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                return ServiceResult<bool>.Error($"Failed to change subscription status");
+            }
+
+            return ServiceResult<bool>.Ok(true);
+
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<bool>.Error("Failed to change subscription status");
+        }
+    }
+
     public async Task<ServiceResult<ProfileModel>> GetProfile(string userId)
     {
         try
@@ -39,10 +87,14 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 return ServiceResult<ProfileModel>.NotFound("Could not find user");
+
             ProfileModel model = new ProfileModel();
             model.UserId = userId;
             model.Email = user.Email!;
             model.MembershipId = user.MembershipId;
+            model.SubscriptionStatus = user.SubscriptionStatus;
+            if(user.CustomerId != null)
+                model.CustomerId = user.CustomerId;
 
             return ServiceResult<ProfileModel>.Ok(model);
 

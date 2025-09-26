@@ -29,6 +29,7 @@ public class AccessTokenService(IConfiguration configuration, UserManager<UserEn
             {
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Email, user.Email)
             };
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

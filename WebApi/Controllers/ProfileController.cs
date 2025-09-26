@@ -33,7 +33,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("profile/add-membership")]
+    [HttpPost("profile/change-membership")]
     public async Task<IActionResult> ChangeMembership([FromQuery] int membershipId)
     {
         try
@@ -48,6 +48,50 @@ public class ProfileController(IProfileService profileService) : ControllerBase
 
             return Ok("Membership was updated in profile successfully");
         } catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("profile/change-subscription-status")]
+    public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string status)
+    {
+        try
+        {
+            if (String.IsNullOrEmpty(status)) return BadRequest("No status was provided");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _profileService.ChangeSubscriptionStatus(userId, status);
+            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
+
+            return Ok("Subscription status was updated in profile successfully");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("profile/change-customer-id")]
+    public async Task<IActionResult> ChangeCustomerId([FromQuery] string customerID)
+    {
+        try
+        {
+            if (String.IsNullOrEmpty(customerID)) return BadRequest("No customer id was provided");
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _profileService.ChangeCustomerId(userId, customerID);
+            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
+
+            return Ok("Customer id was updated in profile successfully");
+        }
+        catch (Exception ex)
         {
             Debug.WriteLine(ex.Message);
             return StatusCode(500, "Something went wrong");
