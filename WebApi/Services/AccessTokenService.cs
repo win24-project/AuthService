@@ -31,7 +31,14 @@ public class AccessTokenService(IConfiguration configuration, UserManager<UserEn
                 new(JwtRegisteredClaimNames.Sub, user.Id),
                 new(JwtRegisteredClaimNames.Email, user.Email)
             };
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        if(roles.Count > 0)
+        {
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        } else
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Member"));
+        }
+        
 
         var token = new JwtSecurityToken(
             issuer: issuer,
