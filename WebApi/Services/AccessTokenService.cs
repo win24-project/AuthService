@@ -22,8 +22,6 @@ public class AccessTokenService(IConfiguration configuration, UserManager<UserEn
         string key = _configuration["JwtPublicKey"];
 
         var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Count == 0)
-            return String.Empty;
 
         var claims = new List<Claim>
             {
