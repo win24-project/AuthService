@@ -47,7 +47,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 //builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //{
-    //options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"));
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection"));
 //});
 
 builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>

@@ -24,7 +24,7 @@ public class AuthController(IAuthService authService, IAccessTokenService access
             var result = await _authService.SignUp(form);
             if (result.Success == true)
             {
-                return Ok(new { success = true, message = "Account created successfully" });
+                return Ok(new { success = true, message = "Account created successfully, Please confirm your email" });
             }
             return StatusCode(result.StatusCode, result.ErrorMessage);
 
@@ -58,4 +58,47 @@ public class AuthController(IAuthService authService, IAccessTokenService access
             return StatusCode(500, "Something went wrong");
         }
     }
+
+    [HttpPost("/confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+    {
+        try
+        {
+            var result = await _authService.ConfirmEmail(email, token);
+            if (result.Success == true)
+            {
+                return Ok(new { success = true, message = "Ýour email is no confirmed and" });
+            }
+            return StatusCode(result.StatusCode, result.ErrorMessage);
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("/resend-email-confirmation")]
+    public async Task<IActionResult> ResendEmailConfirmation([FromQuery] string email)
+    {
+        try
+        {
+            var result = await _authService.SendEmailConfirmationAsync(email);
+            if (result.Success == true)
+            {
+                return Ok("Confirmation link is sent to your email. Please check your inbox");
+            }
+            return StatusCode(result.StatusCode, result.ErrorMessage);
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+
+
 }
