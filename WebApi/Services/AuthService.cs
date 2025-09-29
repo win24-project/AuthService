@@ -71,7 +71,7 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
             List<string> recipients = [email];
 
             var client = new HttpClient();
-            await client.PostAsJsonAsync("https://group-project-emailservice-ebesatdzd9h4b2c2.swedencentral-01.azurewebsites.net/index.html", 
+            await client.PostAsJsonAsync("https://group-project-emailservice-ebesatdzd9h4b2c2.swedencentral-01.azurewebsites.net/api/Email/send", 
                 new
                 {
                     subject,
