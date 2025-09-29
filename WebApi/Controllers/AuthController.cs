@@ -80,11 +80,11 @@ public class AuthController(IAuthService authService, IAccessTokenService access
     }
 
     [HttpPost("/resend-email-confirmation")]
-    public async Task<IActionResult> ResendEmailConfirmation([FromQuery] string email)
+    public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendEmailModel resendEmailModel)
     {
         try
         {
-            var result = await _authService.SendEmailConfirmationAsync(email);
+            var result = await _authService.SendEmailConfirmationAsync(resendEmailModel.Email);
             if (result.Success == true)
             {
                 return Ok("Confirmation link is sent to your email. Please check your inbox");
