@@ -12,4 +12,8 @@ public interface IAuthService
     public Task<ServiceResult<bool>> SendEmailConfirmationAsync(string email);
 
     public Task<ServiceResult<bool>> ConfirmEmail(string email, string token);
+
+    public Task<ServiceResult<bool>> SendForgotPasswordLink(string email);
+
+    public Task<ServiceResult<bool>> ResetPassword(string email, string password, string token);
 }

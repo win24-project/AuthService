@@ -99,6 +99,40 @@ public class AuthController(IAuthService authService, IAccessTokenService access
         }
     }
 
+    [HttpPost("/forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromQuery] string email)
+    {
+        try
+        {
+            var result = await _authService.SendForgotPasswordLink(email);
+            if (!result.Success) return StatusCode(result.StatusCode, $"{result.ErrorMessage}");
+            return Ok(new { success = true, message = "A password reset link is sent to your email, please check your inbox" });
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("/reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] PasswordResetModel form, [FromQuery] string email, [FromQuery] string token)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try
+        {
+            var result = await _authService.ResetPassword(email, form.Password, token );
+            if (!result.Success) return StatusCode(result.StatusCode, $"{result.ErrorMessage}");
+            return Ok(new { success = true, message = "Your password was reset successfully" });
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
 
 
 }

@@ -107,6 +107,63 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
         }
     }
 
+    public async Task<ServiceResult<bool>> SendForgotPasswordLink(string email)
+    {
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null) return ServiceResult<bool>.BadRequest("User with that email does not exist");
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var tokenBytes = Encoding.UTF8.GetBytes(token);
+            var encodedToken = Convert.ToBase64String(tokenBytes);
+
+            string subject = "Reset Password";
+            string htmlContent = GetResetPasswordEmailHtmlContent(email, encodedToken);
+            string textContent = $"Please copy this link https://happy-mud-02a876a03.2.azurestaticapps.net/reset-password?email={email}&token={encodedToken} into your browser to confirm your email";
+            List<string> recipients = [email];
+
+            var client = new HttpClient();
+            await client.PostAsJsonAsync("https://group-project-emailservice-ebesatdzd9h4b2c2.swedencentral-01.azurewebsites.net/api/Email/send",
+                new
+                {
+                    subject,
+                    textContent,
+                    htmlContent,
+                    recipients
+                });
+
+            return ServiceResult<bool>.Ok("Confirmation email has been resent. Please check your inbox.");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return ServiceResult<bool>.Error("Could not send email confirmation link");
+        }
+    }
+
+    public async Task<ServiceResult<bool>> ResetPassword(string email, string password, string token)
+    {
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null) return ServiceResult<bool>.BadRequest("User does not exist");
+
+            var tokenBytes = Convert.FromBase64String(token);
+            var decodedToken = Encoding.UTF8.GetString(tokenBytes);
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, password);
+            if (!result.Succeeded) return ServiceResult<bool>.BadRequest("Token is invalid");
+
+            return ServiceResult<bool>.Ok("Successfully reset email");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return ServiceResult<bool>.Error("Could not reset email");
+        }
+    }
+
     private string GetConfirmEmailHtmlContent(string email, string token)
     {
         return $@"
@@ -137,6 +194,43 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
                         If the button doesn’t work, copy and paste the following link into your browser:<br>
                         <a href=""https://happy-mud-02a876a03.2.azurestaticapps.net/confirm-email?email={email}&token={token}"" style=""color:#FF6B35;"">
                           https://happy-mud-02a876a03.2.azurestaticapps.net/confirm-email?email={email}&token={token}
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                </body>
+                </html>";
+    }
+    private string GetResetPasswordEmailHtmlContent(string email, string token)
+    {
+        return $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset=""UTF-8"">
+                  <title>Reset Password</title>
+                </head>
+                <body style=""margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;"">
+                  <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""max-width:600px; background-color:#ffffff; margin-top:30px; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);"">
+                    <tr>
+                      <td align=""center"" style=""padding: 40px 30px 20px 30px;"">
+                        <h2 style=""color:#FF6B35;"">Reset Password</h2>
+                        <p style=""color:#666666;"">Click the button below to reset your password</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=""center"" style=""padding: 20px;"">
+                        <a href=""https://happy-mud-02a876a03.2.azurestaticapps.net/reset-password?email={email}&token={token}"" 
+                           style=""background-color:#FF6B35; color:#eeefff; padding:12px 24px; text-decoration:none; border-radius:5px; display:inline-block; font-weight:bold;"">
+                          Reset Password
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align=""center"" style=""padding: 20px 30px 40px 30px; font-size:12px; color:#aaaaaa;"">
+                        If the button doesn’t work, copy and paste the following link into your browser:<br>
+                        <a href=""https://happy-mud-02a876a03.2.azurestaticapps.net/reset-password?email={email}&token={token}"" style=""color:#FF6B35;"">
+                          https://happy-mud-02a876a03.2.azurestaticapps.net/reset-password?email={email}&token={token}
                         </a>
                       </td>
                     </tr>
