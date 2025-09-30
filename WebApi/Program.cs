@@ -74,7 +74,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtAudience"],
         ValidIssuer = builder.Configuration["JwtIssuer"],
         IssuerSigningKey = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(builder.Configuration["JwtPublicKey"]))
+        Encoding.UTF8.GetBytes(builder.Configuration["JwtSecret"]))
     };
 
     jwtOptions.MapInboundClaims = true;
