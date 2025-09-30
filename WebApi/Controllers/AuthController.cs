@@ -100,11 +100,11 @@ public class AuthController(IAuthService authService, IAccessTokenService access
     }
 
     [HttpPost("/forgot-password")]
-    public async Task<IActionResult> ForgotPassword([FromQuery] string email)
+    public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordModel resetPasswordModel)
     {
         try
         {
-            var result = await _authService.SendForgotPasswordLink(email);
+            var result = await _authService.SendForgotPasswordLink(resetPasswordModel.Email);
             if (!result.Success) return StatusCode(result.StatusCode, $"{result.ErrorMessage}");
             return Ok(new { success = true, message = "A password reset link is sent to your email, please check your inbox" });
 
