@@ -50,7 +50,9 @@ public class AuthController(IAuthService authService, IAccessTokenService access
             if (string.IsNullOrEmpty(accesstoken))
                 return StatusCode(500, "Failed To create the access token");
 
-            return Ok(new { success = true, message = "You Signed in successfully", token = accesstoken });
+            bool hasActiveSubscription = user.SubscriptionStatus == "active";
+
+            return Ok(new { success = true, message = "You Signed in successfully", token = accesstoken, hasActiveSubscription = hasActiveSubscription });
 
         } catch (Exception ex)
         {
