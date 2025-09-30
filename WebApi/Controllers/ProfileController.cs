@@ -14,6 +14,7 @@ namespace WebApi.Controllers;
 public class ProfileController(IProfileService profileService) : ControllerBase
 {
     private readonly IProfileService _profileService = profileService;
+
     [HttpGet("/profile")]
     public async Task<IActionResult> GetProfile()
     {
@@ -34,41 +35,17 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("/profile/change-membership")]
-    public async Task<IActionResult> ChangeMembership([FromQuery] int membershipId)
+    [HttpGet("/profile/{userId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCustomerId(string userId)
     {
         try
         {
-            if(membershipId == 0) return BadRequest("No membership id was provided");
+            var customerId = await _profileService.GetCustomerId(userId);
+            if(string.IsNullOrEmpty(customerId))
+                return NotFound();
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return Unauthorized();
-
-            var result = await _profileService.ChangeMembership(userId, membershipId);
-            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
-
-            return Ok("Membership was updated in profile successfully");
-        } catch (Exception ex)
-        {
-            Debug.WriteLine(ex.Message);
-            return StatusCode(500, "Something went wrong");
-        }
-    }
-
-    [HttpPost("/profile/change-subscription-status")]
-    public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string status)
-    {
-        try
-        {
-            if (String.IsNullOrEmpty(status)) return BadRequest("No status was provided");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return Unauthorized();
-
-            var result = await _profileService.ChangeSubscriptionStatus(userId, status);
-            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
-
-            return Ok("Subscription status was updated in profile successfully");
+            return Ok(customerId);
         }
         catch (Exception ex)
         {
@@ -77,20 +54,39 @@ public class ProfileController(IProfileService profileService) : ControllerBase
         }
     }
 
-    [HttpPost("/profile/change-customer-id")]
-    public async Task<IActionResult> ChangeCustomerId([FromQuery] string customerID)
+    [HttpPost("/profile/change-membership-plan")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ChangeMembership([FromQuery] string userId, [FromQuery] string membershipPlan)
     {
+        if (String.IsNullOrEmpty(userId)) return BadRequest("No user id was provided");
+        if (String.IsNullOrEmpty(membershipPlan)) return BadRequest("No membership plan was provided");
+
         try
         {
-            if (String.IsNullOrEmpty(customerID)) return BadRequest("No customer id was provided");
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null) return Unauthorized();
-
-            var result = await _profileService.ChangeCustomerId(userId, customerID);
+            var result = await _profileService.ChangeMembershipPlan(userId, membershipPlan);
             if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
 
-            return Ok("Customer id was updated in profile successfully");
+            return Ok("Membership plan was updated successfully");
+        } catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    [HttpPost("/profile/change-subscription-status")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string userId, [FromQuery] string status)
+    {
+        if (String.IsNullOrEmpty(userId)) return BadRequest("No user id was provided");
+        if (String.IsNullOrEmpty(status)) return BadRequest("No status was provided");
+
+        try
+        {
+            var result = await _profileService.ChangeSubscriptionStatus(userId, status);
+            if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
+
+            return Ok("Membership plan was updated successfully");
         }
         catch (Exception ex)
         {
@@ -108,7 +104,7 @@ public class ProfileController(IProfileService profileService) : ControllerBase
             if (String.IsNullOrEmpty(subscriptionRequest.CustomerId)) return BadRequest("No customer id was provided");
             if (String.IsNullOrEmpty(subscriptionRequest.SubscriptionStatus)) return BadRequest("No status was provided");
 
-            var result = await _profileService.AddSubscription(subscriptionRequest.AccountId, subscriptionRequest.SubscriptionStatus, subscriptionRequest.CustomerId);
+            var result = await _profileService.AddSubscription(subscriptionRequest.AccountId, subscriptionRequest.SubscriptionStatus, subscriptionRequest.CustomerId, subscriptionRequest.MemberShipPlan);
             if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
 
             return Ok("Customer id was updated in profile successfully");
