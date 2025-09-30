@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Reflection.Metadata;
 using WebApi.Data.Entities;
 using WebApi.Interfaces;
 using WebApi.Models;
@@ -32,7 +33,30 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> ChangeCustomerId(string userId, string customerÍd)
+    public async Task<string> GetCustomerId(string userId)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return "";
+
+            string customerId = user.CustomerId;
+            if (string.IsNullOrEmpty(customerId))
+            {
+                return "";
+            }
+
+            return customerId;
+
+        }
+        catch (Exception ex)
+        {
+            return "";
+        }
+    }
+
+    public async Task<ServiceResult<bool>> ChangeMembershipPlan(string userId, string membershipPlan)
     {
         try
         {
@@ -40,11 +64,11 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
             if (user == null)
                 return ServiceResult<bool>.NotFound("Could not find user");
 
-            user.CustomerId = customerÍd;
+            user.MemberShipPlan = membershipPlan;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                return ServiceResult<bool>.Error($"Failed to change customer id");
+                return ServiceResult<bool>.Error($"Failed to change membership plan");
             }
 
             return ServiceResult<bool>.Ok(true);
@@ -52,7 +76,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
         catch (Exception ex)
         {
-            return ServiceResult<bool>.Error("Failed to add membership in profile");
+            return ServiceResult<bool>.Error("Failed to change membership plan");
         }
     }
 
@@ -80,7 +104,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId)
+    public async Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId, string membershipPlan)
     {
         try
         {
@@ -90,6 +114,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
 
             user.SubscriptionStatus = status;
             user.CustomerId = customerId;
+            user.MemberShipPlan = membershipPlan;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
@@ -116,7 +141,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
             ProfileModel model = new ProfileModel();
             model.UserId = userId;
             model.Email = user.Email!;
-            model.MembershipId = user.MembershipId;
+            model.MemebershipPlan = user.MemberShipPlan;
             model.SubscriptionStatus = user.SubscriptionStatus;
             if(user.CustomerId != null)
                 model.CustomerId = user.CustomerId;
