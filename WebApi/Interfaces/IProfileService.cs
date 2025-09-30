@@ -8,11 +8,11 @@ namespace WebApi.Interfaces
 
         public Task<ServiceResult<bool>> ChangeMembership(string userId, int membershipId);
 
-        public Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId, string membershipId);
+        public Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId);
 
-        public Task<ServiceResult<bool>> ChangeSubscriptionStatus(string userId, string status);
+        public Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status);
 
-        public Task<ServiceResult<bool>> ChangeMembershipPlan(string userId, string membershipPlan);
+        public Task<ServiceResult<bool>> ChangeMembershipPlan(string customerId, string membershipPlan);
 
         public Task<string> GetCustomerId(string userId); 
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
 using WebApi.Data.Entities;
 using WebApi.Interfaces;
@@ -56,11 +57,11 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> ChangeMembershipPlan(string userId, string membershipPlan)
+    public async Task<ServiceResult<bool>> ChangeMembershipPlan(string customerId, string membershipPlan)
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.CustomerId == customerId);
             if (user == null)
                 return ServiceResult<bool>.NotFound("Could not find user");
 
@@ -80,11 +81,11 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> ChangeSubscriptionStatus(string userId, string status)
+    public async Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status)
     {
         try
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.CustomerId == customerId);
             if (user == null)
                 return ServiceResult<bool>.NotFound("Could not find user");
 
@@ -104,7 +105,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId, string membershipPlan)
+    public async Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId)
     {
         try
         {
@@ -114,7 +115,6 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
 
             user.SubscriptionStatus = status;
             user.CustomerId = customerId;
-            user.MemberShipPlan = membershipPlan;
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
