@@ -19,7 +19,7 @@ public class AccessTokenService(IConfiguration configuration, UserManager<UserEn
     {
         string issuer = _configuration["JwtIssuer"];
         string audience = _configuration["JwtAudience"];
-        string key = _configuration["JwtPublicKey"];
+        string key = _configuration["JwtSecret"];
 
         var roles = await _userManager.GetRolesAsync(user);
 
