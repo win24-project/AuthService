@@ -53,6 +53,23 @@ public class AuthService(UserManager<UserEntity> userManager) : IAuthService
         return ServiceResult<UserEntity>.Ok(user);
     }
 
+    public async Task<ServiceResult<bool>> RemoveAccountAsync(string userId)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user.SubscriptionStatus == "active")
+                return ServiceResult<bool>.BadRequest("You have a active subscripotion, please cancel before removing your account");
+
+            await _userManager.DeleteAsync(user);
+            return ServiceResult<bool>.NoContent(); 
+        } catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return ServiceResult<bool>.Error("Failed to remove the account");
+        }
+    }
+
     public async Task<ServiceResult<bool>> SendEmailConfirmationAsync(string email)
     {
         try
