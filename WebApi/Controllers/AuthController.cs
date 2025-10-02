@@ -61,6 +61,28 @@ public class AuthController(IAuthService authService, IAccessTokenService access
         }
     }
 
+    [HttpPost("/remove-account")]
+    public async Task<IActionResult> RemoveAccount()
+    {
+        try
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null) return Unauthorized();
+
+            var result = await _authService.RemoveAccountAsync(userId);
+            if(result.Success == false) 
+                return StatusCode(result.StatusCode, result.ErrorMessage);
+
+            return NoContent();
+
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex.Message);
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
     [HttpPost("/confirm-email")]
     public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
     {
