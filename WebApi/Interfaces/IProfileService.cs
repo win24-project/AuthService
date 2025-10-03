@@ -10,7 +10,7 @@ namespace WebApi.Interfaces
 
         public Task<ServiceResult<bool>> AddSubscription(string userId, string status, string customerId);
 
-        public Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status);
+        public Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status, bool removeCustomerId);
 
         public Task<ServiceResult<bool>> ChangeMembershipPlan(string customerId, string membershipPlan);
 

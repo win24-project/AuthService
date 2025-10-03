@@ -76,14 +76,14 @@ public class ProfileController(IProfileService profileService) : ControllerBase
 
     [HttpPost("/profile/change-subscription-status")]
     [AllowAnonymous]
-    public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string customerId, [FromQuery] string status)
+    public async Task<IActionResult> ChangeSubscriptionStatus([FromQuery] string customerId, [FromQuery] string status, [FromBody] SubscriptionStatusRequest subscriptionStatusRequest)
     {
         if (String.IsNullOrEmpty(customerId)) return BadRequest("No user id was provided");
         if (String.IsNullOrEmpty(status)) return BadRequest("No status was provided");
 
         try
         {
-            var result = await _profileService.ChangeSubscriptionStatus(customerId, status);
+            var result = await _profileService.ChangeSubscriptionStatus(customerId, status, subscriptionStatusRequest.RemoveCustomerId);
             if (!result.Success) return StatusCode(result.StatusCode, result.ErrorMessage);
 
             return Ok("Membership plan was updated successfully");

@@ -81,7 +81,7 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
         }
     }
 
-    public async Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status)
+    public async Task<ServiceResult<bool>> ChangeSubscriptionStatus(string customerId, string status, bool removeCustomerId)
     {
         try
         {
@@ -90,6 +90,11 @@ public class ProfileService(UserManager<UserEntity> userManager) : IProfileServi
                 return ServiceResult<bool>.NotFound("Could not find user");
 
             user.SubscriptionStatus = status;
+            if(removeCustomerId == true)
+            {
+                user.CustomerId = "";
+                user.MemberShipPlan = "";
+            }
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
